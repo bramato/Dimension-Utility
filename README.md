@@ -143,6 +143,89 @@ echo $initialVolume->toLT(); // Converts to Liter
 | `LiquidVolumeEnum::QT`    | `'QT'`       |
 | `LiquidVolumeEnum::C`     | `'C'`        |
 
+### Area Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\AreaDto;
+use Bramato\DimensionUtility\Enum\AreaEnum;
+use Bramato\DimensionUtility\Services\AreaConversionService;
+
+// Create an AreaDto
+$initialArea = new AreaDto(1.5, AreaEnum::HECTARE);
+// Or using the static factory method
+// $initialArea = AreaDto::create(1.5, 'HECTARE');
+
+// Get the conversion service
+$conversionService = AreaConversionService::create($initialArea);
+
+// Convert to another unit
+$convertedArea = $conversionService->convert(AreaEnum::ACRE);
+
+echo $initialArea . " is equal to " . $convertedArea;
+// Output: 1.5 HECTARE is equal to 3.706580721 ACRE (approx)
+
+// You can also use the shortcut methods on the DTO
+echo $initialArea->toSQM(); // Converts to Square Meters
+// Output: 15000 SQ_METER
+echo $initialArea->toACRE(); // Converts to Acres
+// Output: 3.706580721 ACRE (approx)
+```
+
+**Available Area Units (`AreaEnum`):**
+
+| Enum Case                 | String Value      |
+| ------------------------- | ----------------- |
+| `AreaEnum::SQ_METER`      | `'SQ_METER'`      |
+| `AreaEnum::SQ_KILOMETER`  | `'SQ_KILOMETER'`  |
+| `AreaEnum::SQ_CENTIMETER` | `'SQ_CENTIMETER'` |
+| `AreaEnum::SQ_MILLIMETER` | `'SQ_MILLIMETER'` |
+| `AreaEnum::SQ_FOOT`       | `'SQ_FOOT'`       |
+| `AreaEnum::SQ_YARD`       | `'SQ_YARD'`       |
+| `AreaEnum::SQ_INCH`       | `'SQ_INCH'`       |
+| `AreaEnum::SQ_MILE`       | `'SQ_MILE'`       |
+| `AreaEnum::ACRE`          | `'ACRE'`          |
+| `AreaEnum::HECTARE`       | `'HECTARE'`       |
+
+### Temperature Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\TemperatureDto;
+use Bramato\DimensionUtility\Enum\TemperatureEnum;
+use Bramato\DimensionUtility\Services\TemperatureConversionService;
+
+// Create a TemperatureDto
+$initialTemp = new TemperatureDto(25, TemperatureEnum::CELSIUS);
+// Or using the static factory method
+// $initialTemp = TemperatureDto::create(25, 'CELSIUS');
+
+// Get the conversion service
+$conversionService = TemperatureConversionService::create($initialTemp);
+
+// Convert to another unit
+$convertedTemp = $conversionService->convert(TemperatureEnum::FAHRENHEIT);
+
+echo $initialTemp . " is equal to " . $convertedTemp;
+// Output: 25 CELSIUS is equal to 77 FAHRENHEIT
+
+// You can also use the shortcut methods on the DTO
+echo $initialTemp->toF(); // Converts to Fahrenheit
+// Output: 77 FAHRENHEIT
+echo $initialTemp->toK(); // Converts to Kelvin
+// Output: 298.15 KELVIN
+```
+
+**Available Temperature Units (`TemperatureEnum`):**
+
+| Enum Case                     | String Value   |
+| ----------------------------- | -------------- |
+| `TemperatureEnum::CELSIUS`    | `'CELSIUS'`    |
+| `TemperatureEnum::FAHRENHEIT` | `'FAHRENHEIT'` |
+| `TemperatureEnum::KELVIN`     | `'KELVIN'`     |
+
 ## Testing
 
 This package uses Pest for unit testing. To run the tests, follow these steps:
