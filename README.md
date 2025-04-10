@@ -226,6 +226,132 @@ echo $initialTemp->toK(); // Converts to Kelvin
 | `TemperatureEnum::FAHRENHEIT` | `'FAHRENHEIT'` |
 | `TemperatureEnum::KELVIN`     | `'KELVIN'`     |
 
+### Speed Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\SpeedDto;
+use Bramato\DimensionUtility\Enum\SpeedEnum;
+use Bramato\DimensionUtility\Services\SpeedConversionService;
+
+// Create a SpeedDto
+$initialSpeed = new SpeedDto(100, SpeedEnum::KILOMETER_PER_HOUR);
+// Or using the static factory method
+// $initialSpeed = SpeedDto::create(100, 'KILOMETER_PER_HOUR');
+
+// Get the conversion service
+$conversionService = SpeedConversionService::create($initialSpeed);
+
+// Convert to another unit
+$convertedSpeed = $conversionService->convert(SpeedEnum::MILE_PER_HOUR);
+
+echo $initialSpeed . " is equal to " . $convertedSpeed;
+// Output: 100 KILOMETER_PER_HOUR is equal to 62.1371 MILE_PER_HOUR (approx)
+
+// You can also use the shortcut methods on the DTO
+echo $initialSpeed->toMPS(); // Converts to Meters per Second
+// Output: 27.777... METER_PER_SECOND
+echo $initialSpeed->toMPH(); // Converts to Miles per Hour
+// Output: 62.1371 MILE_PER_HOUR (approx)
+```
+
+**Available Speed Units (`SpeedEnum`):**
+
+| Enum Case                       | String Value           |
+| ------------------------------- | ---------------------- |
+| `SpeedEnum::METER_PER_SECOND`   | `'METER_PER_SECOND'`   |
+| `SpeedEnum::KILOMETER_PER_HOUR` | `'KILOMETER_PER_HOUR'` |
+| `SpeedEnum::MILE_PER_HOUR`      | `'MILE_PER_HOUR'`      |
+| `SpeedEnum::KNOT`               | `'KNOT'`               |
+| `SpeedEnum::FOOT_PER_SECOND`    | `'FOOT_PER_SECOND'`    |
+
+### Data Storage Conversion
+
+**Note:** This conversion service uses the BCMath PHP extension for arbitrary precision math, as data storage values can become very large. Ensure the `bcmath` extension is enabled in your PHP environment.
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\DataStorageDto;
+use Bramato\DimensionUtility\Enum\DataStorageEnum;
+use Bramato\DimensionUtility\Services\DataStorageConversionService;
+
+// Create a DataStorageDto
+$initialStorage = new DataStorageDto(512, DataStorageEnum::MEBIBYTE);
+// Or using the static factory method
+// $initialStorage = DataStorageDto::create(512, 'MEBIBYTE');
+
+// Get the conversion service
+$conversionService = DataStorageConversionService::create($initialStorage);
+
+// Convert to another unit
+$convertedStorage = $conversionService->convert(DataStorageEnum::GIBIBYTE);
+
+echo $initialStorage . " is equal to " . $convertedStorage;
+// Output: 512 MEBIBYTE is equal to 0.5 GIBIBYTE
+
+// You can also use the shortcut methods on the DTO
+echo $initialStorage->toKiB(); // Converts to Kibibytes
+// Output: 524288 KIBIBYTE
+echo $initialStorage->toGiB(); // Converts to Gibibytes
+// Output: 0.5 GIBIBYTE
+```
+
+**Available Data Storage Units (`DataStorageEnum` - Binary Prefixes):**
+
+| Enum Case                   | String Value |
+| --------------------------- | ------------ |
+| `DataStorageEnum::BYTE`     | `'BYTE'`     |
+| `DataStorageEnum::KIBIBYTE` | `'KIBIBYTE'` |
+| `DataStorageEnum::MEBIBYTE` | `'MEBIBYTE'` |
+| `DataStorageEnum::GIBIBYTE` | `'GIBIBYTE'` |
+| `DataStorageEnum::TEBIBYTE` | `'TEBIBYTE'` |
+| `DataStorageEnum::PEBIBYTE` | `'PEBIBYTE'` |
+
+### Pressure Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\PressureDto;
+use Bramato\DimensionUtility\Enum\PressureEnum;
+use Bramato\DimensionUtility\Services\PressureConversionService;
+
+// Create a PressureDto
+$initialPressure = new PressureDto(1, PressureEnum::BAR);
+// Or using the static factory method
+// $initialPressure = PressureDto::create(1, 'BAR');
+
+// Get the conversion service
+$conversionService = PressureConversionService::create($initialPressure);
+
+// Convert to another unit
+$convertedPressure = $conversionService->convert(PressureEnum::PSI);
+
+echo $initialPressure . " is equal to " . $convertedPressure;
+// Output: 1 BAR is equal to 14.50377 PSI (approx)
+
+// You can also use the shortcut methods on the DTO
+echo $initialPressure->toPa(); // Converts to Pascals
+// Output: 100000 PASCAL
+echo $initialPressure->toPsi(); // Converts to PSI
+// Output: 14.50377 PSI (approx)
+```
+
+**Available Pressure Units (`PressureEnum`):**
+
+| Enum Case                  | String Value   |
+| -------------------------- | -------------- |
+| `PressureEnum::PASCAL`     | `'PASCAL'`     |
+| `PressureEnum::KILOPASCAL` | `'KILOPASCAL'` |
+| `PressureEnum::MEGAPASCAL` | `'MEGAPASCAL'` |
+| `PressureEnum::BAR`        | `'BAR'`        |
+| `PressureEnum::MILLIBAR`   | `'MILLIBAR'`   |
+| `PressureEnum::PSI`        | `'PSI'`        |
+| `PressureEnum::ATMOSPHERE` | `'ATMOSPHERE'` |
+| `PressureEnum::TORR`       | `'TORR'`       |
+
 ## Testing
 
 This package uses Pest for unit testing. To run the tests, follow these steps:
