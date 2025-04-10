@@ -17,6 +17,19 @@
             "Bramato\\DimensionUtility\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "minimum-stability": "stable",
-    "prefer-stable": true
-} 
+    "prefer-stable": true,
+    "require-dev": {
+        "pestphp/pest": "^3.8"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}

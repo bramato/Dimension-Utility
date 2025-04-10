@@ -143,6 +143,19 @@ echo $initialVolume->toLT(); // Converts to Liter
 | `LiquidVolumeEnum::QT`    | `'QT'`       |
 | `LiquidVolumeEnum::C`     | `'C'`        |
 
+## Testing
+
+This package uses Pest for unit testing. To run the tests, follow these steps:
+
+1.  Ensure you have installed the development dependencies:
+    ```bash
+    composer install
+    ```
+2.  Run the Pest test suite:
+    ```bash
+    ./vendor/bin/pest
+    ```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request.
