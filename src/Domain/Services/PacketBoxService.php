@@ -226,6 +226,44 @@ class PacketBoxService
             );
         }
 
+        // --- Add FullfilledBoxDto for pre-packed items --- 
+        foreach ($this->getItemsToPack() as $itemData) {
+            if ($itemData['isPacked'] === true) {
+                /** @var ProductDto $productDto */
+                $productDto = $itemData['product'];
+                $quantity = $itemData['quantity'];
+
+                $productDimensions = $productDto->getDimensionsInCM(); // Assumes returns BoxDto
+                $productWeightValueG = $productDto->getWeightInG()->value;
+                $productWeightDto = $productDto->getWeightInG();
+
+                // Calculate a max weight slightly larger than the product itself
+                $maxWeightValueG = $productWeightValueG + 1; // Add 1 gram buffer
+                $maxWeightDto = new WeightDto((float)$maxWeightValueG, WeightEnum::GRAM);
+
+                // Create a BoxDto representing the pre-packed item itself
+                $prePackedBoxDto = new BoxDto(
+                    $productDimensions->length,
+                    $productDimensions->width,
+                    $productDimensions->height,
+                    null, // Let empty weight be calculated by BoxDto constructor
+                    $maxWeightDto, // Set max weight just above product weight
+                    null, // Let inner dimensions be calculated by BoxDto constructor
+                    null,
+                    null
+                );
+
+                // Add one FullfilledBoxDto for each quantity of the pre-packed item
+                for ($i = 0; $i < $quantity; $i++) {
+                    $resultBoxes[] = new FullfilledBoxDto(
+                        $prePackedBoxDto,
+                        $productWeightDto, // Total weight is just the product weight
+                        [$productDto]       // Items array contains only the pre-packed product
+                    );
+                }
+            }
+        }
+
         return $resultBoxes;
     }
 }
