@@ -8,6 +8,7 @@ use Bramato\DimensionUtility\Dto\WeightDto;
 use Bramato\DimensionUtility\Dto\DimensionDto;
 use Bramato\DimensionUtility\Enum\DimensionEnum;
 use Bramato\DimensionUtility\Enum\WeightEnum;
+use Bramato\DimensionUtility\Domain\Dto\ProductDto;
 
 /**
  * Represents a box with specific dimensions and a total weight (box + contents).
@@ -19,10 +20,13 @@ class FullfilledBoxDto
      *
      * @param BoxDto $dimensions The external dimensions of the box.
      * @param WeightDto $totalWeight The total weight of the box including its contents.
+     * @param ProductDto[] $items The items contained within the box.
      */
     public function __construct(
         public readonly BoxDto $dimensions,
-        public readonly WeightDto $totalWeight
+        public readonly WeightDto $totalWeight,
+        /** @var ProductDto[] */
+        public readonly array $items = []
     ) {}
 
     /**

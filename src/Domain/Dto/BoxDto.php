@@ -3,27 +3,98 @@
 namespace Bramato\DimensionUtility\Domain\Dto;
 
 use Bramato\DimensionUtility\Dto\DimensionDto;
+use Bramato\DimensionUtility\Dto\WeightDto;
 use Bramato\DimensionUtility\Enum\DimensionEnum;
+use Bramato\DimensionUtility\Enum\WeightEnum;
 use Bramato\DimensionUtility\Services\DimensionConversionService;
 use InvalidArgumentException;
 
 /**
- * Represents the dimensions (length, width, height) of a box-like object.
+ * Represents the dimensions (length, width, height) of a box-like object,
+ * including its internal dimensions and empty weight.
  */
 class BoxDto
 {
+    public readonly DimensionDto $innerLength;
+    public readonly DimensionDto $innerWidth;
+    public readonly DimensionDto $innerHeight;
+    public readonly WeightDto $weight;
+
     /**
      * Creates a new BoxDto instance.
      *
-     * @param DimensionDto $length Length of the box.
-     * @param DimensionDto $width Width of the box.
-     * @param DimensionDto $height Height of the box.
+     * @param DimensionDto $length External length of the box.
+     * @param DimensionDto $width External width of the box.
+     * @param DimensionDto $height External height of the box.
+     * @param WeightDto|null $weight Weight of the empty box. If null, it's calculated based on surface area.
+     * @param DimensionDto|null $innerLength Internal length. If null, calculated as external length - 1cm.
+     * @param DimensionDto|null $innerWidth Internal width. If null, calculated as external width - 1cm.
+     * @param DimensionDto|null $innerHeight Internal height. If null, calculated as external height - 1cm.
+     * @param bool $is_empty Indicates if the box is considered empty (defaults to true).
+     * @throws InvalidArgumentException If provided inner dimensions are not smaller than outer dimensions.
      */
     public function __construct(
         public readonly DimensionDto $length,
         public readonly DimensionDto $width,
-        public readonly DimensionDto $height
-    ) {}
+        public readonly DimensionDto $height,
+        ?WeightDto $weight = null,
+        ?DimensionDto $innerLength = null,
+        ?DimensionDto $innerWidth = null,
+        ?DimensionDto $innerHeight = null,
+        public readonly bool $is_empty = true
+    ) {
+        $cmUnit = DimensionEnum::CENTIMETER;
+
+        // --- Calculate Weight if Null --- 
+        if ($weight === null) {
+            $surfaceAreaM2 = $this->calculateSurfaceArea(DimensionEnum::METER);
+            $calculatedWeightKg = $surfaceAreaM2 * 0.6; // Factor: 0.6 kg/m²
+            $this->weight = new WeightDto($calculatedWeightKg, WeightEnum::KILOGRAM);
+        } else {
+            $this->weight = $weight;
+        }
+
+        // --- Calculate or Validate Inner Dimensions --- 
+
+        // Length
+        $outerLengthCm = DimensionConversionService::create($this->length)->convert($cmUnit)->value;
+        if ($innerLength === null) {
+            $calculatedInnerLengthCm = max(0, $outerLengthCm - 1); // Ensure non-negative
+            $this->innerLength = new DimensionDto($calculatedInnerLengthCm, $cmUnit);
+        } else {
+            $innerLengthCm = DimensionConversionService::create($innerLength)->convert($cmUnit)->value;
+            if ($innerLengthCm >= $outerLengthCm) {
+                throw new InvalidArgumentException('Inner length must be smaller than outer length.');
+            }
+            $this->innerLength = $innerLength;
+        }
+
+        // Width
+        $outerWidthCm = DimensionConversionService::create($this->width)->convert($cmUnit)->value;
+        if ($innerWidth === null) {
+            $calculatedInnerWidthCm = max(0, $outerWidthCm - 1);
+            $this->innerWidth = new DimensionDto($calculatedInnerWidthCm, $cmUnit);
+        } else {
+            $innerWidthCm = DimensionConversionService::create($innerWidth)->convert($cmUnit)->value;
+            if ($innerWidthCm >= $outerWidthCm) {
+                throw new InvalidArgumentException('Inner width must be smaller than outer width.');
+            }
+            $this->innerWidth = $innerWidth;
+        }
+
+        // Height
+        $outerHeightCm = DimensionConversionService::create($this->height)->convert($cmUnit)->value;
+        if ($innerHeight === null) {
+            $calculatedInnerHeightCm = max(0, $outerHeightCm - 1);
+            $this->innerHeight = new DimensionDto($calculatedInnerHeightCm, $cmUnit);
+        } else {
+            $innerHeightCm = DimensionConversionService::create($innerHeight)->convert($cmUnit)->value;
+            if ($innerHeightCm >= $outerHeightCm) {
+                throw new InvalidArgumentException('Inner height must be smaller than outer height.');
+            }
+            $this->innerHeight = $innerHeight;
+        }
+    }
 
     /**
      * Calculates the volume of the box.
