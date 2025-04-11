@@ -7,6 +7,7 @@ use Bramato\DimensionUtility\Dto\WeightDto;
 use Bramato\DimensionUtility\Enum\DimensionEnum;
 use Bramato\DimensionUtility\Enum\WeightEnum;
 use Bramato\DimensionUtility\Services\DimensionConversionService;
+use Bramato\DimensionUtility\Services\WeightConversionService;
 use InvalidArgumentException;
 
 /**
@@ -19,6 +20,7 @@ class BoxDto
     public readonly DimensionDto $innerWidth;
     public readonly DimensionDto $innerHeight;
     public readonly WeightDto $weight;
+    public readonly WeightDto $maxWeight;
 
     /**
      * Creates a new BoxDto instance.
@@ -27,17 +29,19 @@ class BoxDto
      * @param DimensionDto $width External width of the box.
      * @param DimensionDto $height External height of the box.
      * @param WeightDto|null $weight Weight of the empty box. If null, it's calculated based on surface area.
+     * @param WeightDto|null $maxWeight Maximum gross weight the box can hold. If null, defaults to 10kg.
      * @param DimensionDto|null $innerLength Internal length. If null, calculated as external length - 1cm.
      * @param DimensionDto|null $innerWidth Internal width. If null, calculated as external width - 1cm.
      * @param DimensionDto|null $innerHeight Internal height. If null, calculated as external height - 1cm.
      * @param bool $is_empty Indicates if the box is considered empty (defaults to true).
-     * @throws InvalidArgumentException If provided inner dimensions are not smaller than outer dimensions.
+     * @throws InvalidArgumentException If inner dimensions >= outer dimensions OR maxWeight < weight.
      */
     public function __construct(
         public readonly DimensionDto $length,
         public readonly DimensionDto $width,
         public readonly DimensionDto $height,
         ?WeightDto $weight = null,
+        ?WeightDto $maxWeight = null,
         ?DimensionDto $innerLength = null,
         ?DimensionDto $innerWidth = null,
         ?DimensionDto $innerHeight = null,
@@ -52,6 +56,20 @@ class BoxDto
             $this->weight = new WeightDto($calculatedWeightKg, WeightEnum::KILOGRAM);
         } else {
             $this->weight = $weight;
+        }
+
+        // --- Calculate or Validate Max Weight --- 
+        if ($maxWeight === null) {
+            $this->maxWeight = new WeightDto(10, WeightEnum::KILOGRAM); // Default 10kg
+        } else {
+            $this->maxWeight = $maxWeight;
+        }
+
+        // Validate maxWeight >= weight (using grams for consistency)
+        $weightInG = WeightConversionService::create($this->weight)->convert(WeightEnum::GRAM)->value;
+        $maxWeightInG = WeightConversionService::create($this->maxWeight)->convert(WeightEnum::GRAM)->value;
+        if ($maxWeightInG < $weightInG) {
+            throw new InvalidArgumentException('Maximum weight cannot be less than the empty box weight.');
         }
 
         // --- Calculate or Validate Inner Dimensions --- 
