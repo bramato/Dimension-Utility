@@ -263,8 +263,8 @@ echo $initialSpeed->toMPH(); // Converts to Miles per Hour
 | `SpeedEnum::METER_PER_SECOND`   | `'METER_PER_SECOND'`   |
 | `SpeedEnum::KILOMETER_PER_HOUR` | `'KILOMETER_PER_HOUR'` |
 | `SpeedEnum::MILE_PER_HOUR`      | `'MILE_PER_HOUR'`      |
-| `SpeedEnum::KNOT`               | `'KNOT'`               |
 | `SpeedEnum::FOOT_PER_SECOND`    | `'FOOT_PER_SECOND'`    |
+| `SpeedEnum::KNOT`               | `'KNOT'`               |
 
 ### Data Storage Conversion
 
@@ -504,3 +504,64 @@ Contributions are welcome! Please feel free to submit a pull request.
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information. (Note: You might want to create a LICENSE.md file with the MIT license text).
+
+## Domain DTOs
+
+This package also includes higher-level DTOs in the `Bramato\DimensionUtility\Domain\Dto` namespace:
+
+- `BoxDto`: Represents a physical box with external and internal dimensions, empty weight, and maximum weight capacity.
+- `ProductDto`: Represents a product with dimensions and weight.
+- `FullfilledBoxDto`: Represents a packed box, containing a `BoxDto` (the box used), the total weight, and an array of `ProductDto` items inside.
+
+## Domain Services
+
+- `PacketBoxService`: A service utilizing the `dvdoug/boxpacker` library to solve the bin packing problem. It takes available `BoxDto` definitions (with quantities) and `ProductDto` items (with quantities) and calculates how to pack the items into the boxes, returning an array of `FullfilledBoxDto`.
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Domain\Services\PacketBoxService;
+use Bramato\DimensionUtility\Domain\Dto\BoxDto;
+use Bramato\DimensionUtility\Domain\Dto\ProductDto;
+use Bramato\DimensionUtility\Dto\DimensionDto;
+use Bramato\DimensionUtility\Dto\WeightDto;
+use Bramato\DimensionUtility\Enum\DimensionEnum;
+use Bramato\DimensionUtility\Enum\WeightEnum;
+
+$packerService = new PacketBoxService();
+
+// Add available box types
+$box1 = new BoxDto(
+    new DimensionDto(30, DimensionEnum::CENTIMETER),
+    new DimensionDto(20, DimensionEnum::CENTIMETER),
+    new DimensionDto(10, DimensionEnum::CENTIMETER),
+    new WeightDto(150, WeightEnum::GRAM), // Empty weight
+    new WeightDto(5000, WeightEnum::GRAM) // Max weight
+);
+$packerService->addBox($box1, 50); // 50 boxes of this type available
+
+// Add items to pack
+$product1 = ProductDto::createMetric(10, 8, 4, 250); // L, W, H in cm, Weight in g
+$product2 = ProductDto::createMetric(15, 10, 5, 600);
+
+$packerService->addItem($product1, false, 3); // Add 3 of product1 (not pre-packed)
+$packerService->addItem($product2, false, 2); // Add 2 of product2 (not pre-packed)
+
+// Perform packing
+$packedBoxesResult = $packerService->packItems();
+
+foreach ($packedBoxesResult as $fulfilledBox) {
+    echo "Packed Box: " . $fulfilledBox->dimensions->length . "x" . $fulfilledBox->dimensions->width . "x" . $fulfilledBox->dimensions->height . "\n";
+    echo "Total Weight: " . $fulfilledBox->totalWeight . "\n";
+    echo "Items: \n";
+    foreach ($fulfilledBox->items as $item) {
+        echo " - Product: [" . $item->getDimensionsInCM()->length . "x" . $item->getDimensionsInCM()->width . "x" . $item->getDimensionsInCM()->height . ", " . $item->getWeightInG() . "g]\n";
+    }
+    echo "-----\n";
+}
+
+```
+
+## Acknowledgements
+
+The bin packing functionality provided by `PacketBoxService` relies heavily on the excellent [dvdoug/boxpacker](https://github.com/dvdoug/BoxPacker) library by Doug Wright. Thank you for providing such a useful tool to the PHP community!

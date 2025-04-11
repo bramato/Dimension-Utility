@@ -58,15 +58,18 @@ class BoxDto
             $this->weight = $weight;
         }
 
+        $weightInG = WeightConversionService::create($this->weight)->convert(WeightEnum::GRAM)->value;
+
         // --- Calculate or Validate Max Weight --- 
         if ($maxWeight === null) {
-            $this->maxWeight = new WeightDto(10, WeightEnum::KILOGRAM); // Default 10kg
+            // Default to max of 10kg or (empty weight + 1g)
+            $defaultMaxWeightG = max(10000, $weightInG + 1);
+            $this->maxWeight = new WeightDto($defaultMaxWeightG, WeightEnum::GRAM);
         } else {
             $this->maxWeight = $maxWeight;
         }
 
         // Validate maxWeight >= weight (using grams for consistency)
-        $weightInG = WeightConversionService::create($this->weight)->convert(WeightEnum::GRAM)->value;
         $maxWeightInG = WeightConversionService::create($this->maxWeight)->convert(WeightEnum::GRAM)->value;
         if ($maxWeightInG < $weightInG) {
             throw new InvalidArgumentException('Maximum weight cannot be less than the empty box weight.');
