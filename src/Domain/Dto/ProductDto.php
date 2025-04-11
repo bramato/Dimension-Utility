@@ -33,6 +33,26 @@ class ProductDto
         public readonly ?LiquidVolumeDto $liquidVolume = null
     ) {}
 
+
+    public static function create(
+        string $sku,
+        string $name,
+        DimensionEnum $unitDimension,
+        WeightEnum $unitWeight,
+        float $length,
+        float $width,
+        float $height,
+        float $weight,
+    ): self {
+        $dimensions = new BoxDto(
+            new DimensionDto($length, $unitDimension),
+            new DimensionDto($width, $unitDimension),
+            new DimensionDto($height, $unitDimension)
+        );
+        $weight = new WeightDto($weight, $unitWeight);
+        return new self($sku, $name, $dimensions, $weight);
+    }
+
     /**
      * Static factory method to create a ProductDto using metric units.
      *
@@ -95,6 +115,23 @@ class ProductDto
         return new self($sku, $name, $dimensions, $weight, $liquidVolume);
     }
 
+
+    public function getWeightInG(): WeightDto
+    {
+        return $this->weight->toG();
+    }
+
+    public function getDimensionsInCM(): BoxDto
+    {
+        $widthInCm = $this->dimensions->width->toCM();
+        $heightInCm = $this->dimensions->height->toCM();
+        $lengthInCm = $this->dimensions->length->toCM();
+        return new BoxDto(
+            $widthInCm,
+            $heightInCm,
+            $lengthInCm
+        );
+    }
     // Potential future methods:
     // - getWeightIn(WeightEnum $unit): WeightDto
     // - getDimensionsIn(DimensionEnum $unit): BoxDto (would need BoxDto method)
