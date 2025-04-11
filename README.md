@@ -226,6 +226,66 @@ echo $initialTemp->toK(); // Converts to Kelvin
 | `TemperatureEnum::FAHRENHEIT` | `'FAHRENHEIT'` |
 | `TemperatureEnum::KELVIN`     | `'KELVIN'`     |
 
+## Marketplace Unit Conversion Service
+
+The `Bramato\DimensionUtility\Domain\Services\MarketplaceUnitConversionService` provides static methods to easily convert dimension and weight values provided by different marketplaces (using their specific unit strings like 'inches', 'pounds') into the library's internal `DimensionDto` and `WeightDto` objects.
+
+### Usage
+
+```php
+use Bramato\DimensionUtility\Domain\Services\MarketplaceUnitConversionService;
+use Bramato\DimensionUtility\Dto\DimensionDto; // Assuming this DTO exists
+use Bramato\DimensionUtility\Dto\WeightDto; // Assuming this DTO exists
+use Bramato\DimensionUtility\Enum\DimensionEnum;
+use Bramato\DimensionUtility\Enum\WeightEnum;
+
+// Example data from a marketplace (e.g., Amazon)
+$lengthValue = 15.5;
+$lengthUnit = 'inches'; // Common unit string from marketplace
+$weightValue = 2.1;
+$weightUnit = 'kilograms';
+
+// Convert using the service (defaults to 'amazon' marketplace mapping)
+try {
+    /** @var DimensionDto $dimension */
+    $dimension = MarketplaceUnitConversionService::createDimensionFromMarketplace($lengthValue, $lengthUnit);
+    // $dimension->value will be 15.5
+    // $dimension->unit will be DimensionEnum::INCH
+
+    /** @var WeightDto $weight */
+    $weight = MarketplaceUnitConversionService::createWeightFromMarketplace($weightValue, $weightUnit);
+    // $weight->value will be 2.1
+    // $weight->unit will be WeightEnum::KILOGRAM
+
+    // Generic conversion (determines if it's Dimension or Weight based on unit)
+    $genericDto = MarketplaceUnitConversionService::createFromMarketplace(500, 'grams');
+    if ($genericDto instanceof WeightDto) {
+        // It's a WeightDto(500, WeightEnum::GRAM)
+    }
+
+} catch (\InvalidArgumentException $e) {
+    // Handle cases where the unit or marketplace is unknown/invalid
+    echo "Error: " . $e->getMessage();
+}
+```
+
+### Supported Marketplaces
+
+Currently, the service explicitly supports mappings for:
+
+- `amazon` (default)
+
+### Extending for Other Marketplaces
+
+To add support for a new marketplace (e.g., 'ebay'):
+
+1.  Add a new static array property in `MarketplaceUnitConversionService` with the specific unit mappings for that marketplace (e.g., `private static array $ebayUnitMappings = [...]`).
+2.  Update the `match` statement within the `getMappingForMarketplace` method to include a case for the new marketplace identifier (e.g., `'ebay' => self::$ebayUnitMappings,`).
+3.  You can then call the conversion methods specifying the new marketplace:
+    ```php
+    $ebayWeight = MarketplaceUnitConversionService::createWeightFromMarketplace(1500, 'g', 'ebay'); // Assuming 'g' maps to GRAM in ebayUnitMappings
+    ```
+
 ### Speed Conversion
 
 ```php
