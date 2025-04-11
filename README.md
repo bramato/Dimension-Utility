@@ -143,6 +143,215 @@ echo $initialVolume->toLT(); // Converts to Liter
 | `LiquidVolumeEnum::QT`    | `'QT'`       |
 | `LiquidVolumeEnum::C`     | `'C'`        |
 
+### Area Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\AreaDto;
+use Bramato\DimensionUtility\Enum\AreaEnum;
+use Bramato\DimensionUtility\Services\AreaConversionService;
+
+// Create an AreaDto
+$initialArea = new AreaDto(1.5, AreaEnum::HECTARE);
+// Or using the static factory method
+// $initialArea = AreaDto::create(1.5, 'HECTARE');
+
+// Get the conversion service
+$conversionService = AreaConversionService::create($initialArea);
+
+// Convert to another unit
+$convertedArea = $conversionService->convert(AreaEnum::ACRE);
+
+echo $initialArea . " is equal to " . $convertedArea;
+// Output: 1.5 HECTARE is equal to 3.706580721 ACRE (approx)
+
+// You can also use the shortcut methods on the DTO
+echo $initialArea->toSQM(); // Converts to Square Meters
+// Output: 15000 SQ_METER
+echo $initialArea->toACRE(); // Converts to Acres
+// Output: 3.706580721 ACRE (approx)
+```
+
+**Available Area Units (`AreaEnum`):**
+
+| Enum Case                 | String Value      |
+| ------------------------- | ----------------- |
+| `AreaEnum::SQ_METER`      | `'SQ_METER'`      |
+| `AreaEnum::SQ_KILOMETER`  | `'SQ_KILOMETER'`  |
+| `AreaEnum::SQ_CENTIMETER` | `'SQ_CENTIMETER'` |
+| `AreaEnum::SQ_MILLIMETER` | `'SQ_MILLIMETER'` |
+| `AreaEnum::SQ_FOOT`       | `'SQ_FOOT'`       |
+| `AreaEnum::SQ_YARD`       | `'SQ_YARD'`       |
+| `AreaEnum::SQ_INCH`       | `'SQ_INCH'`       |
+| `AreaEnum::SQ_MILE`       | `'SQ_MILE'`       |
+| `AreaEnum::ACRE`          | `'ACRE'`          |
+| `AreaEnum::HECTARE`       | `'HECTARE'`       |
+
+### Temperature Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\TemperatureDto;
+use Bramato\DimensionUtility\Enum\TemperatureEnum;
+use Bramato\DimensionUtility\Services\TemperatureConversionService;
+
+// Create a TemperatureDto
+$initialTemp = new TemperatureDto(25, TemperatureEnum::CELSIUS);
+// Or using the static factory method
+// $initialTemp = TemperatureDto::create(25, 'CELSIUS');
+
+// Get the conversion service
+$conversionService = TemperatureConversionService::create($initialTemp);
+
+// Convert to another unit
+$convertedTemp = $conversionService->convert(TemperatureEnum::FAHRENHEIT);
+
+echo $initialTemp . " is equal to " . $convertedTemp;
+// Output: 25 CELSIUS is equal to 77 FAHRENHEIT
+
+// You can also use the shortcut methods on the DTO
+echo $initialTemp->toF(); // Converts to Fahrenheit
+// Output: 77 FAHRENHEIT
+echo $initialTemp->toK(); // Converts to Kelvin
+// Output: 298.15 KELVIN
+```
+
+**Available Temperature Units (`TemperatureEnum`):**
+
+| Enum Case                     | String Value   |
+| ----------------------------- | -------------- |
+| `TemperatureEnum::CELSIUS`    | `'CELSIUS'`    |
+| `TemperatureEnum::FAHRENHEIT` | `'FAHRENHEIT'` |
+| `TemperatureEnum::KELVIN`     | `'KELVIN'`     |
+
+### Speed Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\SpeedDto;
+use Bramato\DimensionUtility\Enum\SpeedEnum;
+use Bramato\DimensionUtility\Services\SpeedConversionService;
+
+// Create a SpeedDto
+$initialSpeed = new SpeedDto(100, SpeedEnum::KILOMETER_PER_HOUR);
+// Or using the static factory method
+// $initialSpeed = SpeedDto::create(100, 'KILOMETER_PER_HOUR');
+
+// Get the conversion service
+$conversionService = SpeedConversionService::create($initialSpeed);
+
+// Convert to another unit
+$convertedSpeed = $conversionService->convert(SpeedEnum::MILE_PER_HOUR);
+
+echo $initialSpeed . " is equal to " . $convertedSpeed;
+// Output: 100 KILOMETER_PER_HOUR is equal to 62.1371 MILE_PER_HOUR (approx)
+
+// You can also use the shortcut methods on the DTO
+echo $initialSpeed->toMPS(); // Converts to Meters per Second
+// Output: 27.777... METER_PER_SECOND
+echo $initialSpeed->toMPH(); // Converts to Miles per Hour
+// Output: 62.1371 MILE_PER_HOUR (approx)
+```
+
+**Available Speed Units (`SpeedEnum`):**
+
+| Enum Case                       | String Value           |
+| ------------------------------- | ---------------------- |
+| `SpeedEnum::METER_PER_SECOND`   | `'METER_PER_SECOND'`   |
+| `SpeedEnum::KILOMETER_PER_HOUR` | `'KILOMETER_PER_HOUR'` |
+| `SpeedEnum::MILE_PER_HOUR`      | `'MILE_PER_HOUR'`      |
+| `SpeedEnum::KNOT`               | `'KNOT'`               |
+| `SpeedEnum::FOOT_PER_SECOND`    | `'FOOT_PER_SECOND'`    |
+
+### Data Storage Conversion
+
+**Note:** This conversion service uses the BCMath PHP extension for arbitrary precision math, as data storage values can become very large. Ensure the `bcmath` extension is enabled in your PHP environment.
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\DataStorageDto;
+use Bramato\DimensionUtility\Enum\DataStorageEnum;
+use Bramato\DimensionUtility\Services\DataStorageConversionService;
+
+// Create a DataStorageDto
+$initialStorage = new DataStorageDto(512, DataStorageEnum::MEBIBYTE);
+// Or using the static factory method
+// $initialStorage = DataStorageDto::create(512, 'MEBIBYTE');
+
+// Get the conversion service
+$conversionService = DataStorageConversionService::create($initialStorage);
+
+// Convert to another unit
+$convertedStorage = $conversionService->convert(DataStorageEnum::GIBIBYTE);
+
+echo $initialStorage . " is equal to " . $convertedStorage;
+// Output: 512 MEBIBYTE is equal to 0.5 GIBIBYTE
+
+// You can also use the shortcut methods on the DTO
+echo $initialStorage->toKiB(); // Converts to Kibibytes
+// Output: 524288 KIBIBYTE
+echo $initialStorage->toGiB(); // Converts to Gibibytes
+// Output: 0.5 GIBIBYTE
+```
+
+**Available Data Storage Units (`DataStorageEnum` - Binary Prefixes):**
+
+| Enum Case                   | String Value |
+| --------------------------- | ------------ |
+| `DataStorageEnum::BYTE`     | `'BYTE'`     |
+| `DataStorageEnum::KIBIBYTE` | `'KIBIBYTE'` |
+| `DataStorageEnum::MEBIBYTE` | `'MEBIBYTE'` |
+| `DataStorageEnum::GIBIBYTE` | `'GIBIBYTE'` |
+| `DataStorageEnum::TEBIBYTE` | `'TEBIBYTE'` |
+| `DataStorageEnum::PEBIBYTE` | `'PEBIBYTE'` |
+
+### Pressure Conversion
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Dto\PressureDto;
+use Bramato\DimensionUtility\Enum\PressureEnum;
+use Bramato\DimensionUtility\Services\PressureConversionService;
+
+// Create a PressureDto
+$initialPressure = new PressureDto(1, PressureEnum::BAR);
+// Or using the static factory method
+// $initialPressure = PressureDto::create(1, 'BAR');
+
+// Get the conversion service
+$conversionService = PressureConversionService::create($initialPressure);
+
+// Convert to another unit
+$convertedPressure = $conversionService->convert(PressureEnum::PSI);
+
+echo $initialPressure . " is equal to " . $convertedPressure;
+// Output: 1 BAR is equal to 14.50377 PSI (approx)
+
+// You can also use the shortcut methods on the DTO
+echo $initialPressure->toPa(); // Converts to Pascals
+// Output: 100000 PASCAL
+echo $initialPressure->toPsi(); // Converts to PSI
+// Output: 14.50377 PSI (approx)
+```
+
+**Available Pressure Units (`PressureEnum`):**
+
+| Enum Case                  | String Value   |
+| -------------------------- | -------------- |
+| `PressureEnum::PASCAL`     | `'PASCAL'`     |
+| `PressureEnum::KILOPASCAL` | `'KILOPASCAL'` |
+| `PressureEnum::MEGAPASCAL` | `'MEGAPASCAL'` |
+| `PressureEnum::BAR`        | `'BAR'`        |
+| `PressureEnum::MILLIBAR`   | `'MILLIBAR'`   |
+| `PressureEnum::PSI`        | `'PSI'`        |
+| `PressureEnum::ATMOSPHERE` | `'ATMOSPHERE'` |
+| `PressureEnum::TORR`       | `'TORR'`       |
+
 ## Testing
 
 This package uses Pest for unit testing. To run the tests, follow these steps:
