@@ -352,9 +352,141 @@ echo $initialPressure->toPsi(); // Converts to PSI
 | `PressureEnum::ATMOSPHERE` | `'ATMOSPHERE'` |
 | `PressureEnum::TORR`       | `'TORR'`       |
 
+### Domain DTOs
+
+In addition to the base DTOs for individual units, the package provides several "Domain DTOs" under the `Bramato\DimensionUtility\Domain\Dto` namespace. These DTOs represent more complex real-world concepts and utilize the base DTOs for their measurements.
+
+- **`BoxDto(DimensionDto $length, DimensionDto $width, DimensionDto $height)`**: Represents a physical box with dimensions.
+  - `calculateVolume(): float` - Calculates volume in cubic meters.
+  - `calculateSurfaceArea(): float` - Calculates surface area in square meters.
+  - `getMaxDimension(?DimensionEnum $unitToReturn = null): DimensionDto` - Gets the largest dimension, optionally converting it.
+- **`ProductDto(string $sku, string $name, BoxDto $dimensions, WeightDto $weight, ?LiquidVolumeDto $liquidVolume = null)`**: Represents a product with SKU, name, dimensions, weight, and optional liquid volume.
+  - `createMetric(...)`: Static factory using CM and KG.
+  - `createImperial(...)`: Static factory using INCH and POUND.
+- **`ProductPackageDto(ProductDto $product, BoxDto $packageDimensions, WeightDto $totalWeight, ?WeightDto $emptyPackageWeight = null)`**: Represents a packaged product, including the product itself, package dimensions, total weight, and optional empty package weight.
+  - `calculatePackagingWeight(?WeightEnum $unitToReturn = null): ?WeightDto` - Calculates the weight of the packaging.
+  - `getPackagingWeight(?WeightEnum $unitToReturn = null): ?WeightDto` - Gets the provided or calculated packaging weight.
+- **`FileInfoDto(string $path, DataStorageDto $size, ?string $mimeType = null)`**: Represents information about a file, including its path, size, and optional MIME type.
+  - `getFilename(): string` - Extracts the filename from the path.
+  - `getExtension(): ?string` - Extracts the file extension from the path.
+- **`LocationDto(float $latitude, float $longitude, ?DimensionDto $altitude = null)`**: Represents geographical coordinates with optional altitude (as a `DimensionDto`). Validates latitude (-90 to 90) and longitude (-180 to 180).
+- **`FullfilledBoxDto(BoxDto $dimensions, WeightDto $totalWeight)`**: Represents a box with dimensions and a total weight (box + contents).
+  - `createMetric(...)`: Static factory using CM and KG.
+  - `createImperial(...)`: Static factory using INCH and POUND.
+- **`PhysicalObjectTrait`**: A trait providing common methods for physical objects (like calculating volume or density if dimensions and weight are present). _Note: Currently defined but not used by the provided DTOs._
+- **`WeatherReadingDto(...)`**: Represents a weather reading with various measurements (temperature, pressure, etc.). _Note: Currently defined but requires further implementation/usage examples._
+
+### Domain DTO Usage Examples
+
+**Creating Products using Factory Methods:**
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Domain\Dto\ProductDto;
+
+// Create using metric units
+$productMetric = ProductDto::createMetric(
+    sku: 'MTR001',
+    name: 'Metric Widget',
+    lengthCm: 25,
+    widthCm: 15,
+    heightCm: 10,
+    weightKg: 0.8
+);
+
+echo "Created Metric Product: {$productMetric->name} ({$productMetric->weight})\n";
+
+// Create using imperial units
+$productImperial = ProductDto::createImperial(
+    sku: 'IMP001',
+    name: 'Imperial Gadget',
+    lengthInch: 10,
+    widthInch: 6,
+    heightInch: 4,
+    weightPound: 1.75
+);
+
+echo "Created Imperial Product: {$productImperial->name} ({$productImperial->weight})\n";
+
+```
+
+**Calculating Product Density:**
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Domain\Dto\ProductDto;
+use Bramato\DimensionUtility\Domain\Dto\BoxDto;
+use Bramato\DimensionUtility\Dto\DimensionDto;
+use Bramato\DimensionUtility\Dto\WeightDto;
+use Bramato\DimensionUtility\Enum\DimensionEnum;
+use Bramato\DimensionUtility\Enum\WeightEnum;
+
+$dimensions = new BoxDto(
+    new DimensionDto(10, DimensionEnum::CENTIMETER),
+    new DimensionDto(20, DimensionEnum::CENTIMETER),
+    new DimensionDto(5, DimensionEnum::CENTIMETER) // Volume = 0.001 m³
+);
+$weight = new WeightDto(500, WeightEnum::GRAM); // 0.5 kg
+
+$product = new ProductDto('PROD001', 'My Product', $dimensions, $weight);
+
+// ProductDto uses PhysicalObjectTrait
+try {
+    $density = $product->calculateDensity(); // Returns density in kg/m³
+    echo "Product density: " . round($density, 2) . " kg/m³";
+    // Output: Product density: 500 kg/m³
+} catch (\LogicException $e) {
+    echo "Error calculating density: " . $e->getMessage();
+}
+
+```
+
+**Creating a Weather Reading:**
+
+```php
+<?php
+
+use Bramato\DimensionUtility\Domain\Dto\LocationDto;
+use Bramato\DimensionUtility\Domain\Dto\WeatherReadingDto;
+use Bramato\DimensionUtility\Dto\TemperatureDto;
+use Bramato\DimensionUtility\Dto\PressureDto;
+use Bramato\DimensionUtility\Dto\SpeedDto;
+use Bramato\DimensionUtility\Enum\TemperatureEnum;
+use Bramato\DimensionUtility\Enum\PressureEnum;
+use Bramato\DimensionUtility\Enum\SpeedEnum;
+use DateTimeImmutable;
+
+$timestamp = new DateTimeImmutable('2025-07-01 12:00:00');
+$location = new LocationDto(latitude: 40.7128, longitude: -74.0060); // New York
+$temperature = new TemperatureDto(28, TemperatureEnum::CELSIUS);
+$pressure = new PressureDto(1010, PressureEnum::MILLIBAR);
+$humidity = 55.0; // Percentage
+$windSpeed = new SpeedDto(10, SpeedEnum::MILE_PER_HOUR);
+$windDirection = 180.0; // South
+
+$reading = new WeatherReadingDto(
+    timestamp: $timestamp,
+    location: $location,
+    temperature: $temperature,
+    pressure: $pressure,
+    humidity: $humidity,
+    windSpeed: $windSpeed,
+    windDirection: $windDirection
+);
+
+echo "Weather reading at {$reading->location->latitude}, {$reading->location->longitude} on {$reading->timestamp->format('Y-m-d H:i')}:\n";
+echo "- Temperature: {$reading->temperature}\n";
+echo "- Pressure: {$reading->pressure}\n";
+echo "- Humidity: {$reading->humidity}%\n";
+echo "- Wind: {$reading->windSpeed} from {$reading->windDirection} degrees\n";
+
+```
+
 ## Testing
 
-This package uses Pest for unit testing. To run the tests, follow these steps:
+This package uses Pest for unit testing. The suite currently includes **185 tests** covering all DTOs, Enums, and Conversion Services. To run the tests, follow these steps:
 
 1.  Ensure you have installed the development dependencies:
     ```bash
