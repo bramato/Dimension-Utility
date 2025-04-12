@@ -24,13 +24,17 @@ class ProductDto
      * @param BoxDto $dimensions Physical dimensions of the product.
      * @param WeightDto $weight Weight of the product.
      * @param LiquidVolumeDto|null $liquidVolume Optional: Liquid volume if applicable (e.g., for bottles).
+     * @param int|null $reference_id Optional reference ID.
+     * @param string|null $reference_type Optional reference type.
      */
     public function __construct(
         public readonly string $sku,
         public readonly string $name,
         public readonly BoxDto $dimensions,
         public readonly WeightDto $weight,
-        public readonly ?LiquidVolumeDto $liquidVolume = null
+        public readonly ?LiquidVolumeDto $liquidVolume = null,
+        public readonly ?int $reference_id = null,
+        public readonly ?string $reference_type = null
     ) {}
 
 
@@ -43,14 +47,16 @@ class ProductDto
         float $width,
         float $height,
         float $weight,
+        ?int $reference_id = null,
+        ?string $reference_type = null
     ): self {
         $dimensions = new BoxDto(
             new DimensionDto($length, $unitDimension),
             new DimensionDto($width, $unitDimension),
             new DimensionDto($height, $unitDimension)
         );
-        $weight = new WeightDto($weight, $unitWeight);
-        return new self($sku, $name, $dimensions, $weight);
+        $weightDto = new WeightDto($weight, $unitWeight);
+        return new self($sku, $name, $dimensions, $weightDto, null, $reference_id, $reference_type);
     }
 
     /**
@@ -63,6 +69,8 @@ class ProductDto
      * @param float $heightCm Height in Centimeters.
      * @param float $weightKg Weight in Kilograms.
      * @param LiquidVolumeDto|null $liquidVolume Optional liquid volume DTO.
+     * @param int|null $reference_id Optional reference ID.
+     * @param string|null $reference_type Optional reference type.
      * @return static
      */
     public static function createMetric(
@@ -72,7 +80,9 @@ class ProductDto
         float $widthCm,
         float $heightCm,
         float $weightKg,
-        ?LiquidVolumeDto $liquidVolume = null
+        ?LiquidVolumeDto $liquidVolume = null,
+        ?int $reference_id = null,
+        ?string $reference_type = null
     ): self {
         $dimensions = new BoxDto(
             new DimensionDto($lengthCm, DimensionEnum::CENTIMETER),
@@ -81,7 +91,7 @@ class ProductDto
         );
         $weight = new WeightDto($weightKg, WeightEnum::KILOGRAM);
 
-        return new self($sku, $name, $dimensions, $weight, $liquidVolume);
+        return new self($sku, $name, $dimensions, $weight, $liquidVolume, $reference_id, $reference_type);
     }
 
     /**
@@ -94,6 +104,8 @@ class ProductDto
      * @param float $heightInch Height in Inches.
      * @param float $weightPound Weight in Pounds.
      * @param LiquidVolumeDto|null $liquidVolume Optional liquid volume DTO.
+     * @param int|null $reference_id Optional reference ID.
+     * @param string|null $reference_type Optional reference type.
      * @return static
      */
     public static function createImperial(
@@ -103,7 +115,9 @@ class ProductDto
         float $widthInch,
         float $heightInch,
         float $weightPound,
-        ?LiquidVolumeDto $liquidVolume = null
+        ?LiquidVolumeDto $liquidVolume = null,
+        ?int $reference_id = null,
+        ?string $reference_type = null
     ): self {
         $dimensions = new BoxDto(
             new DimensionDto($lengthInch, DimensionEnum::INCH),
@@ -112,7 +126,7 @@ class ProductDto
         );
         $weight = new WeightDto($weightPound, WeightEnum::POUND);
 
-        return new self($sku, $name, $dimensions, $weight, $liquidVolume);
+        return new self($sku, $name, $dimensions, $weight, $liquidVolume, $reference_id, $reference_type);
     }
 
 
