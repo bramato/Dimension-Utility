@@ -222,7 +222,8 @@ class PacketBoxService
             $resultBoxes[] = new FullfilledBoxDto(
                 $originalBoxDto,
                 $totalWeightDto,
-                $itemsInThisBox // Add the packed items
+                $itemsInThisBox, // Add the packed items
+                $boxReference,
             );
         }
 
@@ -258,7 +259,8 @@ class PacketBoxService
                     $resultBoxes[] = new FullfilledBoxDto(
                         $prePackedBoxDto,
                         $productWeightDto, // Total weight is just the product weight
-                        [$productDto]       // Items array contains only the pre-packed product
+                        [$productDto],
+                        'pre-packed'       // Items array contains only the pre-packed product
                     );
                 }
             }

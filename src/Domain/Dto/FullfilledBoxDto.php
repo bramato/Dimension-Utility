@@ -21,12 +21,14 @@ class FullfilledBoxDto
      * @param BoxDto $dimensions The external dimensions of the box.
      * @param WeightDto $totalWeight The total weight of the box including its contents.
      * @param ProductDto[] $items The items contained within the box.
+     * @param string|null $reference The reference ID of the box.
      */
     public function __construct(
         public readonly BoxDto $dimensions,
         public readonly WeightDto $totalWeight,
         /** @var ProductDto[] */
-        public readonly array $items = []
+        public readonly array $items = [],
+        public readonly ?string $reference = null
     ) {}
 
     /**
@@ -42,7 +44,8 @@ class FullfilledBoxDto
         float $lengthCm,
         float $widthCm,
         float $heightCm,
-        float $weightKg
+        float $weightKg,
+        ?string $reference = null
     ): self {
         $dimensions = new BoxDto(
             new DimensionDto($lengthCm, DimensionEnum::CENTIMETER),
@@ -51,7 +54,7 @@ class FullfilledBoxDto
         );
         $weight = new WeightDto($weightKg, WeightEnum::KILOGRAM);
 
-        return new self($dimensions, $weight);
+        return new self(dimensions: $dimensions, totalWeight: $weight, reference: $reference);
     }
 
     /**
@@ -67,7 +70,8 @@ class FullfilledBoxDto
         float $lengthInch,
         float $widthInch,
         float $heightInch,
-        float $weightPound
+        float $weightPound,
+        ?string $reference = null
     ): self {
         $dimensions = new BoxDto(
             new DimensionDto($lengthInch, DimensionEnum::INCH),
@@ -76,7 +80,7 @@ class FullfilledBoxDto
         );
         $weight = new WeightDto($weightPound, WeightEnum::POUND);
 
-        return new self($dimensions, $weight);
+        return new self(dimensions: $dimensions, totalWeight: $weight, reference: $reference);
     }
 
     // Potential future methods:
